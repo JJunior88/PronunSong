@@ -4,7 +4,7 @@ App web para brasileiros praticarem pronúncia em inglês com letras de músicas
 
 ## Executar
 
-Requer Node.js 22 ou superior. Não há dependências externas para instalar.
+Requer Node.js 22 ou superior. O app não precisa de dependências externas em execução. Para instalar as ferramentas de teste, execute `npm ci`.
 
 ```sh
 npm start
@@ -72,3 +72,11 @@ Antes de integrações externas, validar no celular: importar MP3 e TXT/LRC; sel
 Letras pessoais agora recebem pronúncia escrita aproximada usando o CMU Pronouncing Dictionary, incluído no APK e no site, sem API ou serviço pago. O painel aparece aberto por padrão. Palavras não cadastradas, como alguns nomes ou gírias, aparecem entre colchetes e são listadas como indisponíveis. A conversão é um apoio aproximado para brasileiros, baseada no inglês americano; não é transcrição fonética exata nem avaliação de canto. Consulte o áudio de referência.
 
 Dados: `src/vendor/cmudict.json`, derivados de https://github.com/cmusphinx/cmudict; licença e atribuição em `src/vendor/CMUDICT-LICENSE.txt`. O site carrega o dicionário ao importar a letra; no APK ele já está incluído. A licença deve acompanhar qualquer redistribuição. Esta seção substitui a limitação anterior de ausência de pronúncia escrita em letras importadas.
+
+## Biblioteca salva e guia lento (v0.6)
+
+MP3 e letras importados agora ficam em IndexedDB no aparelho, com várias músicas na biblioteca e botão para excluir. Só aparece confirmação de salvamento após a gravação no banco local concluir. Falta de espaço ou bloqueio de armazenamento é informado. Não precisa reimportar ao reabrir. Limpar os dados, desinstalar o app ou limpeza de armazenamento pelo navegador pode remover os arquivos; não há backup na nuvem. O app solicita armazenamento persistente quando o navegador oferece esse recurso.
+
+O guia tem velocidades de 0,25× a 1×, além de **Ouvir palavra por palavra**, com pausas de 700 ms e botão de parada. O motor de voz do aparelho pode limitar a velocidade efetiva. A escrita usa “x”, “qu”, “gu” e “rr” para facilitar a leitura em português; “f/d” para TH são aproximações, não substituem ouvir e aprender o som original.
+
+Os APKs de teste continuam usando a chave de depuração gerada pelo runner. Atualizações entre execuções podem exigir desinstalação por diferença de assinatura, apagando a biblioteca. Para atualizações sem perda de dados, será necessário configurar uma chave de assinatura persistente em GitHub Secrets em uma etapa separada; nenhuma chave deve ser publicada no repositório.

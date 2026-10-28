@@ -56,6 +56,13 @@ public class MainActivity extends Activity {
             }
         });
         web.setWebChromeClient(new WebChromeClient() {
+            @Override public boolean onJsConfirm(WebView view, String url, String message, JsResult result) {
+                new android.app.AlertDialog.Builder(MainActivity.this).setMessage(message)
+                    .setPositiveButton("Excluir", (dialog, which) -> result.confirm())
+                    .setNegativeButton("Cancelar", (dialog, which) -> result.cancel())
+                    .setOnCancelListener(dialog -> result.cancel()).show();
+                return true;
+            }
             @Override public boolean onShowFileChooser(WebView view, ValueCallback<Uri[]> callback, FileChooserParams params) {
                 if (fileCallback != null) fileCallback.onReceiveValue(null);
                 fileCallback = callback;
@@ -84,10 +91,24 @@ public class MainActivity extends Activity {
         });
         web.addJavascriptInterface(new Object() {
             @JavascriptInterface public void stopSpeech() { runOnUiThread(() -> speech.stop()); }
+            @JavascriptInterface public void speakWords(String text, double rate) {
+                runOnUiThread(() -> {
+                    if (!speechReady) { Toast.makeText(MainActivity.this, "Voz em inglês indisponível. Instale uma voz inglesa no Android.", Toast.LENGTH_LONG).show(); return; }
+                    speech.stop();
+                    speech.setSpeechRate((float)Math.max(0.25, Math.min(1.2, rate)));
+                    java.util.regex.Matcher words = java.util.regex.Pattern.compile("[A-Za-z]+(?:['’][A-Za-z]+)*").matcher(text);
+                    int count = 0;
+                    while (words.find() && count < 500) {
+                        speech.speak(words.group(), TextToSpeech.QUEUE_ADD, null, "word-" + count);
+                        speech.playSilentUtterance(700, TextToSpeech.QUEUE_ADD, "pause-" + count);
+                        count++;
+                    }
+                });
+            }
             @JavascriptInterface public void speak(String text, double rate) {
                 runOnUiThread(() -> {
                     if (!speechReady) { Toast.makeText(MainActivity.this, "Voz em inglês indisponível. Instale uma voz em inglês nas configurações de texto para fala do Android.", Toast.LENGTH_LONG).show(); return; }
-                    speech.setSpeechRate((float)Math.max(0.5, Math.min(1.2, rate)));
+                    speech.setSpeechRate((float)Math.max(0.25, Math.min(1.2, rate)));
                     speech.speak(text.substring(0, Math.min(text.length(), 1000)), TextToSpeech.QUEUE_FLUSH, null, "phrase");
                 });
             }

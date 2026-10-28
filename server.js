@@ -9,7 +9,7 @@ http.createServer(async (req, res) => {
     const url = new URL(req.url, 'http://localhost');
     const pathname = decodeURIComponent(url.pathname);
     const file = path.resolve(root, '.' + (pathname === '/' ? '/index.html' : pathname));
-    if (!file.startsWith(root) || !['index.html', 'src/app.js', 'src/data.js', 'src/import.js', 'src/icon.svg', 'src/pronunciation.js', 'src/vendor/cmudict.json', 'src/styles.css'].includes(path.relative(root, file))) {
+    if (!file.startsWith(root) || !['index.html', 'src/app.js', 'src/data.js', 'src/import.js', 'src/icon.svg', 'src/pronunciation.js', 'src/guide.js', 'src/library-store.js', 'src/vendor/cmudict.json', 'src/styles.css'].includes(path.relative(root, file))) {
       res.writeHead(404); res.end('Não encontrado'); return;
     }
     const content = await readFile(file);

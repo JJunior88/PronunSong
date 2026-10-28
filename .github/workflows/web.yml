@@ -26,6 +26,8 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '24'
+      - name: Instalar ferramentas de teste
+        run: npm ci
       - name: Executar testes e verificar JavaScript
         run: |
           npm test
@@ -34,7 +36,7 @@ jobs:
         run: |
           mkdir -p dist/src
           cp index.html dist/
-          cp src/app.js src/data.js src/import.js src/styles.css src/icon.svg src/pronunciation.js dist/src/
+          cp src/app.js src/data.js src/import.js src/styles.css src/icon.svg src/pronunciation.js src/guide.js src/library-store.js dist/src/
           cp -R src/vendor dist/src/
           touch dist/.nojekyll
       - name: Disponibilizar site para download
