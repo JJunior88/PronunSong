@@ -81,6 +81,7 @@ public class MainActivity extends Activity {
             @Override public void onPermissionRequestCanceled(PermissionRequest request) { if (pending == request) pending = null; }
         });
         web.addJavascriptInterface(new Object() {
+            @JavascriptInterface public void stopSpeech() { runOnUiThread(() -> speech.stop()); }
             @JavascriptInterface public void speak(String text, double rate) {
                 runOnUiThread(() -> {
                     if (!speechReady) { Toast.makeText(MainActivity.this, "Voz em inglês indisponível. Instale uma voz em inglês nas configurações de texto para fala do Android.", Toast.LENGTH_LONG).show(); return; }

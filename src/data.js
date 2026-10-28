@@ -23,3 +23,21 @@ export function loadCompleted(storage) {
   try { const value = JSON.parse(storage.getItem('pronunsong.completed') || '[]'); return new Set(Array.isArray(value) ? value.filter(id => songs.some(s => s.id === id)) : []); }
   catch { return new Set(); }
 }
+
+// Aproximações para apoio inicial; não representam todos os sons do inglês.
+const written = [
+ ['TUÍN-kol, TUÍN-kol, LÍ-tol stár', 'Háu ai UÂN-der uót iu ár', 'Âp a-BÂV dhâ uârld sou hái', 'Láik a DÁI-a-mond in dhâ skái'],
+ ['Rôu, rôu, rôu iór bôut', 'DJÊNT-li dáun dhâ strím', 'MÉ-ri-li, MÉ-ri-li, MÉ-ri-li, MÉ-ri-li', 'Láif iz bât a drím'],
+ ['a-MÊI-zing grêis, háu suít dhâ sáund', 'Dhét sêivd a rétch láik mí', 'Ai uâns uóz lóst, bât náu ém fáund', 'Uóz bláind, bât náu ai sí']
+];
+songs.forEach((song, i) => song.lines.forEach((line, j) => { line.written = written[i][j]; }));
+export function readPractice(storage, key, count) {
+ try {
+  const value = JSON.parse(storage.getItem('pronunsong.practice.' + key) || '{}');
+  return { current: Number.isInteger(value?.current) && value.current >= 0 && value.current < count ? value.current : 0,
+   practiced: [...new Set(Array.isArray(value?.practiced) ? value.practiced.filter(n => Number.isInteger(n) && n >= 0 && n < count) : [])] };
+ } catch { return { current: 0, practiced: [] }; }
+}
+export function writePractice(storage, key, value) {
+ try { storage.setItem('pronunsong.practice.' + key, JSON.stringify(value)); return true; } catch { return false; }
+}

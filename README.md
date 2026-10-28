@@ -58,3 +58,11 @@ O wrapper está em `android/`. Com Java 21 e SDK Android 35 configurados, execut
 Na seção **Importar**, escolha um MP3 de até 50 MB, informe o nome e cole a letra em inglês ou escolha um TXT/LRC de até 200 KB. Toque em **Abrir minha música**. Uma linha representa um trecho; letras LRC com horários permitem iniciar o áudio no trecho selecionado. A velocidade do MP3 é independente da velocidade da pronúncia sintetizada. Letras sem horários usam navegação manual, sem sincronização automática nem tradução.
 
 O áudio e a letra importados ficam somente na sessão atual: recarregar, fechar ou substituir a música exige importar novamente. A biblioteca inicial mantém seu progresso local. Não há envio desses arquivos a um servidor. O Android usa o seletor de documentos do sistema sem pedir acesso geral ao armazenamento. Há uma música pessoal por vez, até 500 trechos.
+
+## Núcleo de prática (v0.4)
+
+Cada trecho tem marcação manual **Pratiquei este trecho**. O app salva no aparelho o último trecho e os trechos praticados, inclusive de letras importadas. Para retomar uma música pessoal depois de fechar, reimporte o MP3 e a mesma letra: a identidade do progresso é calculada a partir do texto e horários da letra. Áudio e letras pessoais não são persistidos. Limpar os dados do app/navegador ou desinstalá-lo apaga o progresso; não há sincronização entre aparelhos.
+
+A biblioteca inicial inclui pronúncia escrita aproximada para brasileiros, apresentada como apoio ao áudio, sem substituir os sons reais. Letras importadas não recebem transcrição ou tradução automática. Gravar a voz não significa avaliar a pronúncia: esta versão não atribui notas nem reconhece o canto. O professor virtual é uma voz sintetizada falada.
+
+Antes de integrações externas, validar no celular: importar MP3 e TXT/LRC; selecionar trecho; ouvir referência; gravar e reproduzir; marcar trecho; fechar e reabrir; reimportar a mesma letra e confirmar a retomada. Conferir também permissão de microfone negada, cancelamento do seletor de arquivos e pausa do app durante a gravação. Busca em catálogo, letras licenciadas, contas, banco de dados e armazenamento remoto ainda não estão implementados.
