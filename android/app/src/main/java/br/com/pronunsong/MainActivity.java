@@ -34,7 +34,9 @@ public class MainActivity extends Activity {
         });
         web = new WebView(this);
         web.setPadding(0, getStatusBarHeight(), 0, 0);
-        web.setBackgroundColor(0xfff8f7f2);
+        web.setBackgroundColor(0xff101024);
+        getWindow().setStatusBarColor(0xff101024);
+        getWindow().setNavigationBarColor(0xff101024);
         setContentView(web);
         web.getSettings().setJavaScriptEnabled(true);
         web.getSettings().setDomStorageEnabled(true);
