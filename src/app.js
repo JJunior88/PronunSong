@@ -22,6 +22,7 @@ function practice() {
 for(const b of document.querySelectorAll('[data-filter]')) b.onclick=()=>{filter=b.dataset.filter; document.querySelectorAll('[data-filter]').forEach(x=>{x.classList.toggle('active',x===b);x.setAttribute('aria-pressed',String(x===b));}); library();};
 for(const [id,delta] of [['previous',-1],['next',1]]) $(id).onclick=()=>{if(!busy&&!pending&&line+delta>=0&&line+delta<selected.lines.length){line+=delta;clearAudio();practice();}};
 $('listen').onclick=()=>{
+ if(window.PronunSongAndroid){window.PronunSongAndroid.speak(selected.lines[line].text,Number($('speed').value));return;}
  if(!window.speechSynthesis){$('status').textContent='Síntese de voz indisponível neste navegador.';return;}
  window.speechSynthesis.cancel(); const u=new SpeechSynthesisUtterance(selected.lines[line].text);u.lang='en-US';u.rate=Number($('speed').value);
  const voice=window.speechSynthesis.getVoices().find(v=>v.lang==='en-US');if(voice)u.voice=voice;
@@ -45,3 +46,5 @@ $('record').onclick=async()=>{
 $('complete').onclick=()=>{completed.has(selected.id)?completed.delete(selected.id):completed.add(selected.id);try{storage.setItem('pronunsong.completed',JSON.stringify([...completed]));}catch{$('status').textContent='Progresso atualizado apenas nesta sessão: armazenamento indisponível.';}library();practice();};
 window.addEventListener('pagehide',()=>{stop();if(recordingUrl)URL.revokeObjectURL(recordingUrl);window.speechSynthesis?.cancel();});
 library();practice();
+
+window.addEventListener('pronunsong-pause',stop);

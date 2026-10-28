@@ -44,3 +44,11 @@ O workflow `.github/workflows/web.yml` executa os testes em pushes para `main` e
 No GitHub, em **Settings → Pages → Build and deployment → Source**, selecione **GitHub Actions**. Depois execute **Actions → PronunSong — testes e site → Run workflow**, caso necessário. O job de publicação apresenta a URL após concluir com sucesso. O endereço esperado é `https://jjunior88.github.io/PronunSong/`.
 
 O Pages serve somente `index.html` e os arquivos de `src/`; o servidor Node e arquivos internos não são publicados. O navegador acessa o site por HTTPS, necessário para o microfone. Voz e microfone continuam dependendo do suporte e das permissões do dispositivo.
+
+## Instalar no celular Android
+
+Em **Actions → Android — testes e APK**, abra uma execução concluída e baixe **PronunSong-Android-debug**, em **Artifacts** (é necessário entrar no GitHub). Extraia o ZIP e abra `app-debug.apk` no celular. Autorize a instalação por esse navegador ou gerenciador de arquivos quando o Android solicitar. Android 8 ou superior; não funciona no iPhone. O APK de depuração é para testes, não para publicação na Play Store.
+
+As músicas e a interface vêm no APK. A voz usa o texto para fala do Android; instale uma voz inglesa nas configurações do sistema se necessário. O microfone exige permissão. Os áudios ficam na sessão; não são enviados pelo app. Atualizações de APKs de depuração de diferentes execuções podem exigir desinstalar a versão anterior, perdendo o progresso local, pois a chave de depuração do runner não é persistida.
+
+O wrapper está em `android/`. Com Java 21 e SDK Android 35 configurados, execute `cd android && ./gradlew lintDebug assembleDebug`. Os arquivos web são copiados automaticamente para os assets durante a compilação.

@@ -1,0 +1,54 @@
+name: Android — testes e APK
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: android-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  build:
+    name: Testar e gerar APK instalável
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Testar aplicação web
+        run: npm test && npm run check
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+      - uses: gradle/actions/setup-gradle@v4
+      - name: Verificar SDK Android
+        shell: bash
+        run: |
+          set -euo pipefail
+          : "${ANDROID_HOME:?SDK Android ausente}"
+          if [[ ! -f "$ANDROID_HOME/platforms/android-35/android.jar" || ! -x "$ANDROID_HOME/build-tools/35.0.0/aapt2" ]]; then
+            "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" 'platforms;android-35' 'build-tools;35.0.0'
+          fi
+      - name: Analisar e compilar APK de teste
+        working-directory: android
+        run: ./gradlew --no-daemon lintDebug assembleDebug
+      - name: Disponibilizar APK para celular
+        uses: actions/upload-artifact@v4
+        with:
+          name: PronunSong-Android-debug
+          path: android/app/build/outputs/apk/debug/app-debug.apk
+          if-no-files-found: error
+          retention-days: 14
+      - name: Disponibilizar relatório de análise
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: PronunSong-Android-relatorios
+          path: android/app/build/reports/lint-results-debug.*
+          if-no-files-found: warn
