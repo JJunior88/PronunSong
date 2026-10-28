@@ -52,3 +52,9 @@ Em **Actions → Android — testes e APK**, abra uma execução concluída e ba
 As músicas e a interface vêm no APK. A voz usa o texto para fala do Android; instale uma voz inglesa nas configurações do sistema se necessário. O microfone exige permissão. Os áudios ficam na sessão; não são enviados pelo app. Atualizações de APKs de depuração de diferentes execuções podem exigir desinstalar a versão anterior, perdendo o progresso local, pois a chave de depuração do runner não é persistida.
 
 O wrapper está em `android/`. Com Java 21 e SDK Android 35 configurados, execute `cd android && ./gradlew lintDebug assembleDebug`. Os arquivos web são copiados automaticamente para os assets durante a compilação.
+
+## Importar suas músicas (v0.2)
+
+Na seção **Importar**, escolha um MP3 de até 50 MB, informe o nome e cole a letra em inglês ou escolha um TXT/LRC de até 200 KB. Toque em **Abrir minha música**. Uma linha representa um trecho; letras LRC com horários permitem iniciar o áudio no trecho selecionado. A velocidade do MP3 é independente da velocidade da pronúncia sintetizada. Letras sem horários usam navegação manual, sem sincronização automática nem tradução.
+
+O áudio e a letra importados ficam somente na sessão atual: recarregar, fechar ou substituir a música exige importar novamente. A biblioteca inicial mantém seu progresso local. Não há envio desses arquivos a um servidor. O Android usa o seletor de documentos do sistema sem pedir acesso geral ao armazenamento. Há uma música pessoal por vez, até 500 trechos.

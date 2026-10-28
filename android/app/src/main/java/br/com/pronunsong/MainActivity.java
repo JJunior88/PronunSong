@@ -2,6 +2,10 @@ package br.com.pronunsong;
 
 import android.Manifest;
 import android.app.Activity;
+import android.content.Intent;
+import android.net.Uri;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.speech.tts.TextToSpeech;
@@ -17,6 +21,8 @@ public class MainActivity extends Activity {
     private PermissionRequest pending;
     private TextToSpeech speech;
     private boolean speechReady;
+    private ValueCallback<Uri[]> fileCallback;
+    private final Set<String> selectedFiles = ConcurrentHashMap.newKeySet();
 
     @Override public void onCreate(Bundle state) {
         super.onCreate(state);
@@ -33,11 +39,12 @@ public class MainActivity extends Activity {
         web.getSettings().setJavaScriptEnabled(true);
         web.getSettings().setDomStorageEnabled(true);
         web.getSettings().setAllowFileAccess(false);
-        web.getSettings().setAllowContentAccess(false);
+        web.getSettings().setAllowContentAccess(true);
         WebViewAssetLoader loader = new WebViewAssetLoader.Builder()
             .addPathHandler("/assets/", new WebViewAssetLoader.AssetsPathHandler(this)).build();
         web.setWebViewClient(new WebViewClient() {
             @Override public WebResourceResponse shouldInterceptRequest(WebView view, WebResourceRequest request) {
+                if ("content".equals(request.getUrl().getScheme()) && selectedFiles.contains(request.getUrl().toString())) return null;
                 WebResourceResponse local = loader.shouldInterceptRequest(request.getUrl());
                 if (local != null) return local;
                 return new WebResourceResponse("text/plain", "UTF-8", 403, "Forbidden", java.util.Collections.emptyMap(), new java.io.ByteArrayInputStream(new byte[0]));
@@ -47,6 +54,22 @@ public class MainActivity extends Activity {
             }
         });
         web.setWebChromeClient(new WebChromeClient() {
+            @Override public boolean onShowFileChooser(WebView view, ValueCallback<Uri[]> callback, FileChooserParams params) {
+                if (fileCallback != null) fileCallback.onReceiveValue(null);
+                fileCallback = callback;
+                Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
+                intent.addCategory(Intent.CATEGORY_OPENABLE);
+                // Some file providers do not label LRC files as text/plain.
+                boolean audio = Arrays.stream(params.getAcceptTypes()).anyMatch(t -> t.contains("audio") || t.contains("mp3"));
+                intent.setType(audio ? "audio/*" : "*/*");
+                intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+                try { startActivityForResult(intent, 8); }
+                catch (android.content.ActivityNotFoundException error) {
+                    fileCallback.onReceiveValue(null); fileCallback = null;
+                    Toast.makeText(MainActivity.this, "Nenhum seletor de arquivos disponível.", Toast.LENGTH_LONG).show();
+                }
+                return true;
+            }
             @Override public void onPermissionRequest(PermissionRequest request) {
                 runOnUiThread(() -> {
                     if (!ORIGIN.equals(request.getOrigin().toString().replaceAll("/$", "")) ||
@@ -72,6 +95,16 @@ public class MainActivity extends Activity {
         int resource = getResources().getIdentifier("status_bar_height", "dimen", "android");
         return resource > 0 ? getResources().getDimensionPixelSize(resource) : 0;
     }
+    @Override protected void onActivityResult(int code, int result, Intent data) {
+        super.onActivityResult(code, result, data);
+        if (code == 8 && fileCallback != null) {
+            Uri uri = result == RESULT_OK && data != null ? data.getData() : null;
+            if (uri != null && "content".equals(uri.getScheme())) {
+                selectedFiles.add(uri.toString()); fileCallback.onReceiveValue(new Uri[]{uri});
+            } else fileCallback.onReceiveValue(null);
+            fileCallback = null;
+        }
+    }
     @Override public void onRequestPermissionsResult(int code, String[] names, int[] results) {
         super.onRequestPermissionsResult(code, names, results);
         if (code == 7 && pending != null) {
@@ -85,6 +118,7 @@ public class MainActivity extends Activity {
     }
     @Override protected void onDestroy() {
         if (pending != null) { pending.deny(); pending = null; }
+        if (fileCallback != null) { fileCallback.onReceiveValue(null); fileCallback = null; }
         web.destroy(); speech.shutdown(); super.onDestroy();
     }
 }
