@@ -34,7 +34,8 @@ jobs:
         run: |
           mkdir -p dist/src
           cp index.html dist/
-          cp src/app.js src/data.js src/import.js src/styles.css src/icon.svg dist/src/
+          cp src/app.js src/data.js src/import.js src/styles.css src/icon.svg src/pronunciation.js dist/src/
+          cp -R src/vendor dist/src/
           touch dist/.nojekyll
       - name: Disponibilizar site para download
         uses: actions/upload-artifact@v4

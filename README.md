@@ -66,3 +66,9 @@ Cada trecho tem marcação manual **Pratiquei este trecho**. O app salva no apar
 A biblioteca inicial inclui pronúncia escrita aproximada para brasileiros, apresentada como apoio ao áudio, sem substituir os sons reais. Letras importadas não recebem transcrição ou tradução automática. Gravar a voz não significa avaliar a pronúncia: esta versão não atribui notas nem reconhece o canto. O professor virtual é uma voz sintetizada falada.
 
 Antes de integrações externas, validar no celular: importar MP3 e TXT/LRC; selecionar trecho; ouvir referência; gravar e reproduzir; marcar trecho; fechar e reabrir; reimportar a mesma letra e confirmar a retomada. Conferir também permissão de microfone negada, cancelamento do seletor de arquivos e pausa do app durante a gravação. Busca em catálogo, letras licenciadas, contas, banco de dados e armazenamento remoto ainda não estão implementados.
+
+## Correção de pronúncia para letras importadas (v0.5.1)
+
+Letras pessoais agora recebem pronúncia escrita aproximada usando o CMU Pronouncing Dictionary, incluído no APK e no site, sem API ou serviço pago. O painel aparece aberto por padrão. Palavras não cadastradas, como alguns nomes ou gírias, aparecem entre colchetes e são listadas como indisponíveis. A conversão é um apoio aproximado para brasileiros, baseada no inglês americano; não é transcrição fonética exata nem avaliação de canto. Consulte o áudio de referência.
+
+Dados: `src/vendor/cmudict.json`, derivados de https://github.com/cmusphinx/cmudict; licença e atribuição em `src/vendor/CMUDICT-LICENSE.txt`. O site carrega o dicionário ao importar a letra; no APK ele já está incluído. A licença deve acompanhar qualquer redistribuição. Esta seção substitui a limitação anterior de ausência de pronúncia escrita em letras importadas.

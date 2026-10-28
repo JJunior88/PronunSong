@@ -1,5 +1,6 @@
 import { songs, progress, loadCompleted, readPractice, writePractice } from './data.js';
 import { parseLyrics, validateAudio, MAX_LYRICS } from './import.js';
+import { loadDictionary, writtenPronunciation } from './pronunciation.js';
 let importedSong, musicUrl;
 const $ = id => document.getElementById(id);
 let storage; try { storage = localStorage; } catch { storage = { getItem: () => null, setItem: () => {} }; }
@@ -26,7 +27,8 @@ function practice() {
  $('mark-line').textContent=saved.practiced.includes(line)?'✓ Trecho praticado · desfazer':'✓ Pratiquei este trecho';
  $('mark-line').disabled=busy||pending;
  $('phrase-progress').textContent=`${saved.practiced.length} de ${selected.lines.length} trechos praticados`+(persisted?' · salvo neste aparelho':' · armazenamento indisponível');
- $('written').textContent=phrase.written||'A pronúncia escrita ainda não está disponível para letras importadas. Ouça a referência falada e pratique frase por frase.';
+ $('written').textContent=phrase.written||'Pronúncia escrita indisponível para este trecho.';
+ $('written-status').textContent=phrase.unknown?.length ? 'Sem pronúncia cadastrada: '+phrase.unknown.join(', ')+'. Essas palavras aparecem entre colchetes; ouça a referência.' : (selected.custom?'Aproximação gerada com dicionário de inglês americano.':'Apoio de leitura da biblioteca inicial.');
  $('line-picker').replaceChildren(...selected.lines.map((phrase,index)=>{const b=document.createElement('button');b.type='button';b.textContent=String(index+1)+(saved.practiced.includes(index)?' ✓':'');b.setAttribute('aria-label',`Trecho ${index+1}: ${phrase.text}`);b.setAttribute('aria-pressed',String(index===line));b.className=index===line?'selected':'';b.disabled=busy||pending;b.onclick=()=>{line=index;clearAudio();practice();};return b;}));
  $('practice-title').textContent=selected.title; $('lyric').textContent=phrase.text; $('translation').textContent=phrase.translation; $('tip').textContent=phrase.tip;
  $('line-count').textContent=`Trecho ${line+1} de ${selected.lines.length}`;
@@ -72,9 +74,14 @@ $('lyrics-file').onchange=async()=>{
 $('audio-file').onchange=()=>{const file=$('audio-file').files[0];if(file&&!$('song-title').value)$('song-title').value=file.name.replace(/\.mp3$/i,'').slice(0,100);};
 $('import-form').onsubmit=async e=>{
  e.preventDefault();
- if(busy||pending){$('import-status').textContent='Finalize a gravação antes de importar.';return;}
+ const submit=$('import-form').querySelector('[type=submit]');if(submit.disabled)return;submit.disabled=true;
+ if(busy||pending){$('import-status').textContent='Finalize a gravação antes de importar.';submit.disabled=false;return;}
  try{
  const file=$('audio-file').files[0];validateAudio(file);const lines=parseLyrics($('lyrics-text').value);
+ $('import-status').textContent='Preparando a pronúncia escrita…';
+ const dictionary=await loadDictionary();
+ for(const phrase of lines)Object.assign(phrase,writtenPronunciation(phrase.text,dictionary));
+ if(busy||pending)throw Error('Finalize a gravação e importe novamente.');
  const fingerprint=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(JSON.stringify(lines.map(l=>[l.text,l.time]))));
  const customId='custom-'+Array.from(new Uint8Array(fingerprint),b=>b.toString(16).padStart(2,'0')).join('');
  const title=$('song-title').value.trim();if(!title)throw Error('Informe o nome da música.');
@@ -85,6 +92,7 @@ $('import-form').onsubmit=async e=>{
  $('music-status').textContent=lines.some(l=>l.time!==null)?'Letra com horários: selecione um trecho e toque em “Ouvir no MP3”.':'Letra sem horários: controle o áudio e avance pelos trechos manualmente.';
  $('practice').scrollIntoView({behavior:'smooth'});
  }catch(error){$('import-status').textContent=error.message;}
+ finally{submit.disabled=false;}
 };
 $('music-speed').onchange=()=>{$('music-audio').playbackRate=Number($('music-speed').value);};
 $('seek-line').onclick=async()=>{const time=selected.lines[line].time;if(!selected.custom||time==null||busy||pending)return;try{if(!Number.isFinite($('music-audio').duration))throw Error('Aguarde o carregamento do áudio.');if(time>=$('music-audio').duration)throw Error('O horário deste trecho ultrapassa a duração do MP3.');$('music-audio').currentTime=time;await $('music-audio').play();}catch(e){$('music-status').textContent=e.message;}};
